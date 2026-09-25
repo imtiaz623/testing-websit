@@ -1,0 +1,245 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>My Account &#8212; FreshDrop</title>
+  <meta name="description" content="Manage your FreshDrop profile, orders, saved addresses, and account settings." />
+  <meta name="theme-color" content="#1b4332" />
+  <meta name="robots" content="noindex" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath fill='%231B4332' d='M20 4C12 10 8 18 8 24a12 12 0 0 0 24 0c0-6-4-14-12-20Z'/%3E%3Cpath stroke='%23F8FAF6' stroke-width='2' stroke-linecap='round' d='M20 12v20'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body>
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" width="28" height="28">
+            <path d="M20 4C12 10 8 18 8 24a12 12 0 0 0 24 0c0-6-4-14-12-20Z" fill="currentColor"/>
+            <path d="M20 12v20" stroke="#F8FAF6" stroke-width="2" stroke-linecap="round"/>
+          </svg>
+        </span>
+        FreshDrop
+      </a>
+      <div class="nav-right">
+        <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="false">
+          <svg class="icon-sun" width="19" height="19" viewBox="0 0 24 24" fill="none">
+            <circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.8"/>
+            <path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/>
+          </svg>
+          <svg class="icon-moon" width="19" height="19" viewBox="0 0 24 24" fill="none">
+            <path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/>
+          </svg>
+        </button>
+        <a href="index.html" class="btn btn-ghost">Back to site</a>
+      </div>
+    </div>
+  </header>
+
+  <main id="main-content">
+    <section class="dashboard">
+      <div class="section-inner">
+        <div class="dashboard-banner">
+          Sample account view &#8212; this dashboard shows placeholder data for demonstration. Connect a real account system to show your own orders and details.
+        </div>
+
+        <div class="dashboard-inner">
+          <aside class="dashboard-sidebar" aria-label="Account navigation">
+            <div class="dashboard-user">
+              <span class="review-avatar dashboard-avatar">JL</span>
+              <div>
+                <p class="dashboard-user-name">Jordan Lee</p>
+                <p class="dashboard-user-email">jordan@example.com</p>
+              </div>
+            </div>
+            <nav class="dashboard-nav">
+              <button class="dashboard-nav-item active" data-panel="profile" type="button">Profile</button>
+              <button class="dashboard-nav-item" data-panel="orders" type="button">My Orders</button>
+              <button class="dashboard-nav-item" data-panel="track" type="button">Track Order</button>
+              <button class="dashboard-nav-item" data-panel="addresses" type="button">Saved Addresses</button>
+              <button class="dashboard-nav-item" data-panel="settings" type="button">Settings</button>
+              <button class="dashboard-nav-item" data-panel="help" type="button">Help &amp; Support</button>
+              <button class="dashboard-nav-item logout" id="logoutBtn" type="button">Log out</button>
+            </nav>
+          </aside>
+
+          <div class="dashboard-content card-panel">
+
+            <!-- Profile -->
+            <div class="dashboard-panel active" data-panel="profile">
+              <h2>Profile</h2>
+              <p class="section-lead">Update your personal details.</p>
+              <form class="dashboard-form" id="profileForm" novalidate>
+                <div class="form-row">
+                  <label for="profileName">Full name</label>
+                  <input type="text" id="profileName" value="Jordan Lee" required />
+                </div>
+                <div class="form-row">
+                  <label for="profileEmail">Email address</label>
+                  <input type="email" id="profileEmail" value="jordan@example.com" required />
+                </div>
+                <div class="form-row">
+                  <label for="profilePhone">Phone number</label>
+                  <input type="tel" id="profilePhone" value="(555) 123-4567" required />
+                </div>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+              </form>
+            </div>
+
+            <!-- My Orders -->
+            <div class="dashboard-panel" data-panel="orders">
+              <h2>My Orders</h2>
+              <p class="section-lead">Sample order history.</p>
+              <div class="order-list">
+                <div class="order-row">
+                  <div><p class="order-row-id">FD-1001</p><p class="order-row-date">Sep 18, 2026</p></div>
+                  <p class="order-row-items">Fruits &amp; Vegetables, Bakery</p>
+                  <span class="order-status-badge out">Out for delivery</span>
+                </div>
+                <div class="order-row">
+                  <div><p class="order-row-id">FD-2045</p><p class="order-row-date">Sep 10, 2026</p></div>
+                  <p class="order-row-items">Dairy &amp; Eggs, Pantry Staples</p>
+                  <span class="order-status-badge delivered">Delivered</span>
+                </div>
+                <div class="order-row">
+                  <div><p class="order-row-id">FD-1877</p><p class="order-row-date">Aug 29, 2026</p></div>
+                  <p class="order-row-items">Meat &amp; Seafood</p>
+                  <span class="order-status-badge delivered">Delivered</span>
+                </div>
+              </div>
+            </div>
+
+            <!-- Track Order -->
+            <div class="dashboard-panel" data-panel="track">
+              <h2>Track Order</h2>
+              <p class="section-lead">Enter an order ID to see its live status.</p>
+              <form class="tracking-form" id="dashboardTrackingForm" novalidate>
+                <input type="text" id="dashboardTrackingId" placeholder="e.g. FD-1001" aria-label="Order ID" required />
+                <button type="submit" class="btn btn-primary">Track order</button>
+              </form>
+              <div class="tracking-result" id="dashboardTrackingResult" hidden>
+                <div class="tracking-result-head">
+                  <span class="tracking-order-id" id="dashboardTrackingOrderId"></span>
+                  <p class="tracking-status-text" id="dashboardTrackingStatusText"></p>
+                </div>
+                <ol class="timeline" id="dashboardTimeline">
+                  <li class="timeline-step" data-status="placed"><span class="timeline-dot"></span><div><h4>Order Confirmed</h4><p>We've received your order and confirmed the details.</p></div></li>
+                  <li class="timeline-step" data-status="preparing"><span class="timeline-dot"></span><div><h4>Preparing your basket</h4><p>Your items are being hand-picked and packed cold.</p></div></li>
+                  <li class="timeline-step" data-status="out-for-delivery"><span class="timeline-dot"></span><div><h4>Out for delivery</h4><p>Your driver is on the way to your address.</p></div></li>
+                  <li class="timeline-step" data-status="delivered"><span class="timeline-dot"></span><div><h4>Delivered</h4><p>Enjoy your fresh groceries!</p></div></li>
+                </ol>
+              </div>
+            </div>
+
+            <!-- Saved Addresses -->
+            <div class="dashboard-panel" data-panel="addresses">
+              <h2>Saved Addresses</h2>
+              <p class="section-lead">Manage the addresses linked to your account.</p>
+              <div class="address-grid">
+                <div class="address-card">
+                  <h3>Home</h3>
+                  <p>123 Maple Street, Springfield</p>
+                  <div class="address-actions">
+                    <button class="link-btn small" type="button">Edit</button>
+                    <button class="link-btn small" type="button">Remove</button>
+                  </div>
+                </div>
+                <div class="address-card">
+                  <h3>Work</h3>
+                  <p>88 Market Avenue, Springfield</p>
+                  <div class="address-actions">
+                    <button class="link-btn small" type="button">Edit</button>
+                    <button class="link-btn small" type="button">Remove</button>
+                  </div>
+                </div>
+              </div>
+              <button class="btn btn-ghost" type="button" style="margin-top: 18px;">+ Add new address</button>
+            </div>
+
+            <!-- Settings -->
+            <div class="dashboard-panel" data-panel="settings">
+              <h2>Settings</h2>
+              <p class="section-lead">Control how FreshDrop reaches you.</p>
+              <div class="settings-row">
+                <div><h3>Order updates</h3><p>Get notified about order status changes.</p></div>
+                <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+              </div>
+              <div class="settings-row">
+                <div><h3>Promotions &amp; offers</h3><p>Receive occasional discounts and news.</p></div>
+                <label class="toggle-switch"><input type="checkbox" /><span class="toggle-slider"></span></label>
+              </div>
+              <div class="settings-row">
+                <div><h3>SMS alerts</h3><p>Get delivery updates by text message.</p></div>
+                <label class="toggle-switch"><input type="checkbox" checked /><span class="toggle-slider"></span></label>
+              </div>
+              <form class="dashboard-form" id="passwordForm" novalidate style="margin-top: 24px;">
+                <div class="form-row">
+                  <label for="newPassword">New password</label>
+                  <input type="password" id="newPassword" placeholder="At least 6 characters" minlength="6" />
+                </div>
+                <button type="submit" class="btn btn-primary">Update password</button>
+              </form>
+            </div>
+
+            <!-- Help & Support -->
+            <div class="dashboard-panel" data-panel="help">
+              <h2>Help &amp; Support</h2>
+              <p class="section-lead">Get answers fast, or reach a real person.</p>
+              <div class="contact-channels">
+                <a href="tel:+15559876543" class="contact-channel">
+                  <div class="why-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M6.6 10.8c1.4 2.7 3.6 4.9 6.3 6.3l2.1-2.1c.3-.3.7-.4 1-.2 1.1.4 2.3.6 3.5.6.6 0 1 .4 1 1V20c0 .6-.4 1-1 1C10.9 21 3 13.1 3 3.5c0-.6.4-1 1-1h3.6c.6 0 1 .4 1 1 0 1.2.2 2.4.6 3.5.1.4 0 .8-.2 1L6.6 10.8Z" stroke="currentColor" stroke-width="1.6" stroke-linejoin="round"/></svg></div>
+                  <div><h3>Call us</h3><p>(555) 987-6543</p></div>
+                </a>
+                <a href="index.html#faq" class="contact-channel">
+                  <div class="why-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="12" r="9" stroke="currentColor" stroke-width="1.8"/><path d="M9.5 9a2.5 2.5 0 1 1 3.5 2.3c-.7.3-1 .8-1 1.7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/><circle cx="12" cy="16.5" r="0.9" fill="currentColor"/></svg></div>
+                  <div><h3>Browse FAQs</h3><p>Answers to common questions</p></div>
+                </a>
+                <a href="https://wa.me/911234567890" class="contact-channel" target="_blank" rel="noopener">
+                  <div class="why-icon"><svg width="20" height="20" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2a10 10 0 0 0-8.6 15.1L2 22l5-1.3A10 10 0 1 0 12 2Zm0 18.2a8.1 8.1 0 0 1-4.2-1.2l-.3-.2-3 .8.8-2.9-.2-.3A8.2 8.2 0 1 1 12 20.2Z"/></svg></div>
+                  <div><h3>WhatsApp</h3><p>Chat with our support team</p></div>
+                </a>
+              </div>
+            </div>
+
+          </div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <footer class="site-footer" id="footer">
+    <div class="section-inner footer-inner">
+      <div>
+        <a href="index.html" class="brand footer-brand">
+          <span class="brand-mark" aria-hidden="true">
+            <svg viewBox="0 0 40 40" width="26" height="26">
+              <path d="M20 4C12 10 8 18 8 24a12 12 0 0 0 24 0c0-6-4-14-12-20Z" fill="currentColor"/>
+              <path d="M20 12v20" stroke="#1B4332" stroke-width="2" stroke-linecap="round"/>
+            </svg>
+          </span>
+          FreshDrop
+        </a>
+        <p class="footer-tagline">Fresh groceries, delivered with care.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms &amp; Conditions</a>
+      </div>
+    </div>
+    <p class="footer-bottom">&#169; 2026 FreshDrop. All rights reserved.</p>
+  </footer>
+
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <script src="script.js"></script>
+  <script src="account.js"></script>
+</body>
+</html>
