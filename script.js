@@ -2,22 +2,29 @@
    FreshDrop \u2014 Interactivity (clean redesign)
    ========================================================================== */
 
-document.addEventListener("DOMContentLoaded", function () {
+/* ==========================================================================
+   FreshDrop \u2014 Interactivity (clean redesign)
+   ========================================================================== */
 
-  /* ---------- Utility: toast notifications ---------- */
+/* Global toast utility -- intentionally outside DOMContentLoaded so other
+   shared scripts (cart.js, wishlist.js, marketplace-ui.js) can call
+   showToast() on any page, in any load order, as long as the page has a
+   #toastContainer element. */
+function showToast(message, type) {
   const toastContainer = document.getElementById("toastContainer");
+  if (!toastContainer) return;
+  const toast = document.createElement("div");
+  toast.className = "toast" + (type === "error" ? " error" : "");
+  toast.textContent = message;
+  toastContainer.appendChild(toast);
+  requestAnimationFrame(function () { toast.classList.add("show"); });
+  setTimeout(function () {
+    toast.classList.remove("show");
+    setTimeout(function () { toast.remove(); }, 300);
+  }, 3200);
+}
 
-  function showToast(message, type) {
-    const toast = document.createElement("div");
-    toast.className = "toast" + (type === "error" ? " error" : "");
-    toast.textContent = message;
-    toastContainer.appendChild(toast);
-    requestAnimationFrame(function () { toast.classList.add("show"); });
-    setTimeout(function () {
-      toast.classList.remove("show");
-      setTimeout(function () { toast.remove(); }, 300);
-    }, 3200);
-  }
+document.addEventListener("DOMContentLoaded", function () {
 
   function escapeHtml(str) {
     const div = document.createElement("div");
@@ -190,24 +197,31 @@ document.addEventListener("DOMContentLoaded", function () {
     btn.href = "https://wa.me/" + WHATSAPP_NUMBER + "?text=" + encodeURIComponent(message);
   });
 
-  /* ---------- Category search & filter ---------- */
+  /* ---------- Shop by Category: render + search ---------- */
+  const categoryGrid = document.getElementById("categoryGrid");
   const categorySearch = document.getElementById("categorySearch");
-  const filterChips = document.querySelectorAll(".chip");
-  const allCategoryCards = document.querySelectorAll(".category-card");
   const noResults = document.getElementById("noResults");
-  let activeFilter = "all";
+
+  if (categoryGrid && typeof PRODUCT_CATEGORIES !== "undefined") {
+    categoryGrid.innerHTML = PRODUCT_CATEGORIES.map(function (cat) {
+      return (
+        '<a href="store.html?category=' + cat.id + '" class="category-card" data-category="' + cat.id + '" style="align-items:center;text-align:center;">' +
+          '<div class="category-icon" style="background:var(--lime-soft); font-size:1.7rem; margin:0 auto 14px;">' + cat.icon + '</div>' +
+          '<h3>' + cat.label + '</h3>' +
+        '</a>'
+      );
+    }).join("");
+  }
+
+  const allCategoryCards = document.querySelectorAll(".category-card");
 
   function applyCategoryFilters() {
     const query = (categorySearch.value || "").trim().toLowerCase();
     let visibleCount = 0;
 
     allCategoryCards.forEach(function (card) {
-      const cardCategory = card.getAttribute("data-category");
       const title = card.querySelector("h3").textContent.toLowerCase();
-      const desc = card.querySelector("p").textContent.toLowerCase();
-      const matchesFilter = activeFilter === "all" || cardCategory === activeFilter;
-      const matchesSearch = !query || title.includes(query) || desc.includes(query);
-      const show = matchesFilter && matchesSearch;
+      const show = !query || title.includes(query);
       card.classList.toggle("filtered-out", !show);
       if (show) visibleCount++;
     });
@@ -216,24 +230,6 @@ document.addEventListener("DOMContentLoaded", function () {
   }
 
   if (categorySearch) categorySearch.addEventListener("input", applyCategoryFilters);
-
-  filterChips.forEach(function (chip) {
-    chip.addEventListener("click", function () {
-      filterChips.forEach(function (c) { c.classList.remove("active"); });
-      chip.classList.add("active");
-      activeFilter = chip.getAttribute("data-filter");
-      applyCategoryFilters();
-    });
-  });
-
-  document.querySelectorAll("[data-order-category]").forEach(function (btn) {
-    btn.addEventListener("click", function () {
-      const category = btn.getAttribute("data-order-category");
-      const categorySelect = document.getElementById("category");
-      if (categorySelect) categorySelect.value = category;
-      document.getElementById("order").scrollIntoView({ behavior: "smooth" });
-    });
-  });
 
   /* ---------- Reviews: render + "Write a review" modal ---------- */
   const reviewGrid = document.getElementById("reviewGrid");
@@ -418,6 +414,7 @@ document.addEventListener("DOMContentLoaded", function () {
 
   if (trackingForm) {
     const trackingIdInput = document.getElementById("trackingId");
+    const trackingMobileInput = document.getElementById("trackingMobile");
     const trackingResult = document.getElementById("trackingResult");
     const trackingOrderId = document.getElementById("trackingOrderId");
     const trackingStatusText = document.getElementById("trackingStatusText");
@@ -449,11 +446,15 @@ document.addEventListener("DOMContentLoaded", function () {
       trackingStatusText.textContent = statusMessages[status];
     };
 
-    var trackOrder = function (rawId) {
+    var trackOrder = function (rawId, mobile) {
       const id = rawId.trim().toUpperCase();
       if (!id) { showToast("Enter an order ID to track your delivery.", "error"); return; }
+      if (!mobile || !mobile.trim()) { showToast("Enter the mobile number used for this order.", "error"); return; }
 
-      let order = orderStore[id];
+      /* Check the persistent order store first (real orders placed at checkout),
+         then fall back to the seeded in-memory demo orders, then a deterministic
+         demo status for any other well-formed ID so the feature is explorable. */
+      let order = (typeof ordersGet === "function" ? ordersGet(id) : null) || orderStore[id];
       if (!order) {
         if (!/^FD-\d{3,5}$/.test(id)) {
           showToast("We couldn't find an order with that ID.", "error");
@@ -469,9 +470,16 @@ document.addEventListener("DOMContentLoaded", function () {
       trackingResult.scrollIntoView({ behavior: "smooth", block: "nearest" });
     };
 
-    trackingForm.addEventListener("submit", function (e) { e.preventDefault(); trackOrder(trackingIdInput.value); });
+    trackingForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      trackOrder(trackingIdInput.value, trackingMobileInput.value);
+    });
     if (sampleIdBtn) {
-      sampleIdBtn.addEventListener("click", function () { trackingIdInput.value = "FD-1001"; trackOrder("FD-1001"); });
+      sampleIdBtn.addEventListener("click", function () {
+        trackingIdInput.value = "FD-1001";
+        trackingMobileInput.value = "03001234567";
+        trackOrder("FD-1001", "03001234567");
+      });
     }
   }
 
@@ -670,5 +678,60 @@ document.addEventListener("DOMContentLoaded", function () {
     revealTargets.forEach(function (el) { revealObserver.observe(el); });
   } else {
     revealTargets.forEach(function (el) { el.classList.add("in-view"); });
+  }
+
+  /* ---------- Header search (desktop + mobile) ---------- */
+  const navSearchInput = document.getElementById("navSearchInput");
+  if (navSearchInput) {
+    navSearchInput.addEventListener("keydown", function (e) {
+      if (e.key === "Enter" && navSearchInput.value.trim()) {
+        window.location.href = "store.html?q=" + encodeURIComponent(navSearchInput.value.trim());
+      }
+    });
+  }
+
+  const mobileSearchToggle = document.getElementById("mobileSearchToggle");
+  const mobileSearchBar = document.getElementById("mobileSearchBar");
+  const mobileSearchForm = document.getElementById("mobileSearchForm");
+  const mobileSearchInput = document.getElementById("mobileSearchInput");
+
+  if (mobileSearchToggle && mobileSearchBar) {
+    mobileSearchToggle.addEventListener("click", function () {
+      mobileSearchBar.hidden = !mobileSearchBar.hidden;
+      if (!mobileSearchBar.hidden) mobileSearchInput.focus();
+    });
+  }
+
+  if (mobileSearchForm) {
+    mobileSearchForm.addEventListener("submit", function (e) {
+      e.preventDefault();
+      if (mobileSearchInput.value.trim()) {
+        window.location.href = "store.html?q=" + encodeURIComponent(mobileSearchInput.value.trim());
+      }
+    });
+  }
+
+  /* ---------- Highlight active bottom-nav item by current page ---------- */
+  const currentPage = (window.location.pathname.split("/").pop() || "index.html");
+  document.querySelectorAll(".bottom-nav-item").forEach(function (link) {
+    const linkPage = link.getAttribute("href").split("?")[0].split("#")[0];
+    link.classList.toggle("active", linkPage === currentPage || (currentPage === "" && linkPage === "index.html"));
+  });
+
+  /* ---------- Homepage product showcases (Flash Deals, Trending, Best Sellers, New Arrivals) ---------- */
+  if (typeof PRODUCTS !== "undefined" && typeof renderProductGrid === "function") {
+    const byBadge = function (badge, limit) {
+      return PRODUCTS.filter(function (p) { return p.badges.indexOf(badge) !== -1; }).slice(0, limit || 4);
+    };
+    const renderShowcases = function () {
+      renderProductGrid(document.getElementById("flashDealsGrid"), byBadge("flashDeal", 4));
+      renderProductGrid(document.getElementById("trendingGrid"), byBadge("trending", 4));
+      renderProductGrid(document.getElementById("bestSellersGrid"), byBadge("bestseller", 4));
+      renderProductGrid(document.getElementById("newArrivalsGrid"), byBadge("newArrival", 4));
+    };
+    renderShowcases();
+    if (typeof syncProductsFromFirestore === "function") {
+      syncProductsFromFirestore(renderShowcases);
+    }
   }
 });
