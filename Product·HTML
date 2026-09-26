@@ -1,0 +1,178 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title id="pageTitle">Product | FreshDrop</title>
+  <meta name="description" id="pageDescription" content="Shop at FreshDrop with nationwide delivery and cash on delivery." />
+  <meta name="theme-color" content="#1b4332" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath fill='%231B4332' d='M20 4C12 10 8 18 8 24a12 12 0 0 0 24 0c0-6-4-14-12-20Z'/%3E%3Cpath stroke='%23F8FAF6' stroke-width='2' stroke-linecap='round' d='M20 12v20'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="has-bottom-nav">
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">
+        <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40" width="28" height="28"><path d="M20 4C12 10 8 18 8 24a12 12 0 0 0 24 0c0-6-4-14-12-20Z" fill="currentColor"/><path d="M20 12v20" stroke="#F8FAF6" stroke-width="2" stroke-linecap="round"/></svg></span>
+        FreshDrop
+      </a>
+      <nav class="nav-links" id="navLinks">
+        <a href="index.html">Home</a>
+        <a href="store.html" class="nav-store-link">Store</a>
+        <a href="index.html#categories">Categories</a>
+        <a href="store.html?deal=1">Deals</a>
+        <a href="index.html#track">Track Order</a>
+      </nav>
+      <div class="nav-search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="text" id="navSearchInput" placeholder="Search products..." aria-label="Search products" />
+      </div>
+      <div class="nav-right">
+        <button class="icon-btn mobile-search-toggle" id="mobileSearchToggle" aria-label="Search">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <a href="cart.html" class="icon-btn cart-icon-btn" aria-label="View cart">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="20.5" r="1.3" fill="currentColor"/><circle cx="17.5" cy="20.5" r="1.3" fill="currentColor"/></svg>
+          <span class="cart-badge hidden" data-cart-count>0</span>
+        </a>
+        <a href="account.html" class="icon-btn" aria-label="My account">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c1.2-3.8 4.2-6 7-6s5.8 2.2 7 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </a>
+        <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="false">
+          <svg class="icon-sun" width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <svg class="icon-moon" width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks"><span></span><span></span><span></span></button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-search-bar" id="mobileSearchBar" hidden>
+    <div class="section-inner">
+      <form id="mobileSearchForm" novalidate>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="text" id="mobileSearchInput" placeholder="Search products..." aria-label="Search products" />
+      </form>
+    </div>
+  </div>
+
+  <main id="main-content">
+    <section class="product-detail">
+      <div class="section-inner">
+        <p class="breadcrumb" id="breadcrumb"><a href="index.html">Home</a> / <a href="store.html">Store</a> / <span id="breadcrumbCategory"></span></p>
+
+        <div id="productNotFound" hidden>
+          <p class="no-results">We couldn't find that product. <a href="store.html" class="link-btn">Browse the store</a></p>
+        </div>
+
+        <div class="product-detail-grid" id="productDetailContent" hidden>
+          <div class="product-gallery">
+            <div class="product-gallery-main" id="galleryMain"></div>
+            <div class="product-gallery-thumbs" id="galleryThumbs"></div>
+          </div>
+
+          <div class="product-detail-info">
+            <h1 class="product-detail-title" id="productTitle"></h1>
+            <p class="product-detail-brand" id="productBrand"></p>
+
+            <div class="product-detail-rating">
+              <span class="product-stars" id="productStars"></span>
+              <span class="product-review-count" id="productReviewCount"></span>
+            </div>
+
+            <div class="product-detail-price-row">
+              <span class="product-detail-price-current" id="productPriceCurrent"></span>
+              <span class="product-detail-price-original" id="productPriceOriginal"></span>
+            </div>
+            <p class="product-detail-discount" id="productDiscount"></p>
+
+            <p class="product-description" id="productDescription" style="color: var(--muted); font-size: 0.94rem; margin-bottom: 22px;"></p>
+
+            <div class="qty-selector">
+              <button class="qty-btn" id="qtyDecrease" type="button" aria-label="Decrease quantity">&#8722;</button>
+              <span class="qty-value" id="qtyValue">1</span>
+              <button class="qty-btn" id="qtyIncrease" type="button" aria-label="Increase quantity">+</button>
+            </div>
+
+            <div class="product-detail-actions">
+              <button class="btn btn-ghost" id="addToCartBtn" type="button">Add to Cart</button>
+              <button class="btn btn-primary" id="buyNowBtn" type="button">Buy Now</button>
+              <button class="wishlist-btn" id="pdpWishlistBtn" style="position: static;" aria-label="Add to wishlist" aria-pressed="false" type="button">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.4-9.5 9-9.5 9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+              </button>
+            </div>
+
+            <div class="detail-info-list">
+              <div class="detail-info-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M4 8h16l-1.2 10.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8L4 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg> Nationwide delivery within 3&#8211;5 business days</div>
+              <div class="detail-info-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><rect x="2" y="6" width="20" height="13" rx="2" stroke="currentColor" stroke-width="1.8"/><path d="M2 10h20" stroke="currentColor" stroke-width="1.8"/></svg> Cash on Delivery available</div>
+              <div class="detail-info-item"><svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M3 12a9 9 0 1 0 3-6.7M3 4v5h5" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> Easy returns within 7 days of delivery</div>
+              <div class="detail-info-item" id="stockLine"></div>
+            </div>
+          </div>
+        </div>
+
+        <div class="product-tabs" id="productTabs" hidden>
+          <button class="product-tab-btn active" data-tab="description" type="button">Description</button>
+          <button class="product-tab-btn" data-tab="specs" type="button">Specifications</button>
+          <button class="product-tab-btn" data-tab="reviews" type="button">Reviews</button>
+        </div>
+
+        <div class="product-tab-panel active" data-tab="description" id="tabDescription"></div>
+        <div class="product-tab-panel" data-tab="specs" id="tabSpecs"></div>
+        <div class="product-tab-panel" data-tab="reviews" id="tabReviews">
+          <p class="section-lead" style="margin-bottom: 16px;">Sample reviews shown for demonstration.</p>
+          <div class="review-grid" id="productReviewGrid" style="grid-template-columns: 1fr; max-width: 560px;"></div>
+        </div>
+
+        <div class="related-products" id="relatedProducts" hidden>
+          <h2>You may also like</h2>
+          <div class="store-product-grid" id="relatedProductGrid"></div>
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <div class="sticky-buy-bar" id="stickyBuyBar">
+    <span class="sticky-buy-price" id="stickyBuyPrice"></span>
+    <button class="btn btn-ghost" id="stickyAddToCartBtn" type="button">Add to Cart</button>
+    <button class="btn btn-primary" id="stickyBuyNowBtn" type="button">Buy Now</button>
+  </div>
+
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+    <div class="mobile-bottom-nav-inner">
+      <a href="index.html" class="bottom-nav-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11 12 4l8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>Home</a>
+      <a href="store.html" class="bottom-nav-item active"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8h16l-1.2 10.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8L4 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 8V6a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Store</a>
+      <a href="store.html?deal=1" class="bottom-nav-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12 12.6 4.6a2 2 0 0 0-1.4-.6H5a1 1 0 0 0-1 1v6.2c0 .5.2 1 .6 1.4L12 20l8-8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/></svg>Deals</a>
+      <a href="cart.html" class="bottom-nav-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="20.5" r="1.3" fill="currentColor"/><circle cx="17.5" cy="20.5" r="1.3" fill="currentColor"/></svg>Cart<span class="bottom-nav-badge hidden" data-cart-count>0</span></a>
+      <a href="account.html" class="bottom-nav-item"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c1.2-3.8 4.2-6 7-6s5.8 2.2 7 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>Account</a>
+    </div>
+  </nav>
+
+  <footer class="site-footer" id="footer">
+    <div class="section-inner footer-inner">
+      <div>
+        <a href="index.html" class="brand footer-brand"><span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40" width="26" height="26"><path d="M20 4C12 10 8 18 8 24a12 12 0 0 0 24 0c0-6-4-14-12-20Z" fill="currentColor"/><path d="M20 12v20" stroke="#1B4332" stroke-width="2" stroke-linecap="round"/></svg></span>FreshDrop</a>
+        <p class="footer-tagline">Online shopping, delivered nationwide.</p>
+      </div>
+      <div class="footer-links"><h4>Explore</h4><a href="store.html">Store</a><a href="index.html#track">Track order</a><a href="index.html#faq">FAQ</a></div>
+      <div class="footer-links"><h4>Legal</h4><a href="privacy.html">Privacy Policy</a><a href="terms.html">Terms &amp; Conditions</a></div>
+    </div>
+    <p class="footer-bottom">&#169; 2026 FreshDrop. All rights reserved.</p>
+  </footer>
+
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <script src="products-data.js"></script>
+  <script src="cart.js"></script>
+  <script src="wishlist.js"></script>
+  <script src="marketplace-ui.js"></script>
+  <script src="script.js"></script>
+  <script src="product.js"></script>
+</body>
+</html>
