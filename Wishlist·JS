@@ -1,0 +1,60 @@
+/* ==========================================================================
+   FreshDrop Marketplace -- Wishlist (shared across all pages)
+   ========================================================================== */
+
+const WISHLIST_KEY = "freshdrop-wishlist";
+
+function wishlistRead() {
+  try {
+    const raw = localStorage.getItem(WISHLIST_KEY);
+    return raw ? JSON.parse(raw) : [];
+  } catch (err) {
+    return [];
+  }
+}
+
+function wishlistWrite(ids) {
+  try {
+    localStorage.setItem(WISHLIST_KEY, JSON.stringify(ids));
+  } catch (err) {
+    /* storage unavailable -- fail silently */
+  }
+  wishlistUpdateButtons();
+}
+
+function wishlistHas(productId) {
+  return wishlistRead().indexOf(productId) !== -1;
+}
+
+function wishlistToggle(productId) {
+  const ids = wishlistRead();
+  const index = ids.indexOf(productId);
+  if (index === -1) {
+    ids.push(productId);
+  } else {
+    ids.splice(index, 1);
+  }
+  wishlistWrite(ids);
+  return index === -1; /* true if just added */
+}
+
+function wishlistRemove(productId) {
+  const ids = wishlistRead().filter(function (id) { return id !== productId; });
+  wishlistWrite(ids);
+}
+
+function wishlistGetProducts() {
+  const ids = wishlistRead();
+  return PRODUCTS.filter(function (p) { return ids.indexOf(p.productId) !== -1; });
+}
+
+/** Syncs every [data-wishlist-btn] on the page with current wishlist state. */
+function wishlistUpdateButtons() {
+  document.querySelectorAll("[data-wishlist-btn]").forEach(function (btn) {
+    const id = btn.getAttribute("data-wishlist-btn");
+    btn.classList.toggle("active", wishlistHas(id));
+    btn.setAttribute("aria-pressed", String(wishlistHas(id)));
+  });
+}
+
+document.addEventListener("DOMContentLoaded", wishlistUpdateButtons);
