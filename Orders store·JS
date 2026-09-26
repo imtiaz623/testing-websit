@@ -1,0 +1,83 @@
+/* ==========================================================================
+   FreshDrop Marketplace -- Persistent order store
+   Bridges Checkout -> Track Order: orders placed via checkout.js are saved
+   here so the tracking feature on index.html can look them up later, even
+   after navigating between pages (in-memory objects don't survive that).
+   ========================================================================== */
+
+const ORDERS_KEY = "freshdrop-orders";
+
+function ordersReadAll() {
+  try {
+    const raw = localStorage.getItem(ORDERS_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (err) {
+    return {};
+  }
+}
+
+function ordersWriteAll(orders) {
+  try {
+    localStorage.setItem(ORDERS_KEY, JSON.stringify(orders));
+  } catch (err) {
+    /* storage unavailable -- fail silently */
+  }
+}
+
+function ordersGenerateId() {
+  const all = ordersReadAll();
+  let id;
+  do { id = "FD-" + Math.floor(1000 + Math.random() * 9000); } while (all[id]);
+  return id;
+}
+
+/** order shape: { status, customerName, mobile, city, area, address,
+    landmark, items: [{title, quantity, price}], subtotal, delivery, total,
+    placedAt } */
+function ordersSave(orderId, orderData) {
+  const all = ordersReadAll();
+  all[orderId] = Object.assign({ status: "placed", placedAt: Date.now() }, orderData);
+  ordersWriteAll(all);
+}
+
+function ordersGet(orderId) {
+  const all = ordersReadAll();
+  return all[orderId] || null;
+}
+
+/* ==========================================================================
+   Optional Firestore sync (progressive enhancement)
+   --------------------------------------------------------------------------
+   Orders are always saved to localStorage first (ordersSave above), so
+   "track my order" keeps working instantly on the customer's own device
+   even with no Firebase set up. If Firebase IS configured, the same order
+   is also written to Firestore's "orders" collection so it shows up in the
+   admin dashboard, and so tracking works from any device/browser.
+   ========================================================================== */
+
+function ordersSaveRemote(orderId, orderData) {
+  if (typeof FIREBASE_ENABLED === "undefined" || !FIREBASE_ENABLED || !firebaseDb) return;
+  firebaseDb.collection("orders").doc(orderId)
+    .set(Object.assign({ status: "placed", placedAt: Date.now() }, orderData))
+    .catch(function (err) { console.warn("Could not sync order to Firestore.", err); });
+}
+
+/** Looks up an order for tracking: tries Firestore first (works from any
+    device), falls back to the local order (works even if Firebase isn't
+    configured, for orders placed on this same browser). Always calls back
+    with either the order object or null. */
+function ordersLookup(orderId, callback) {
+  if (typeof FIREBASE_ENABLED !== "undefined" && FIREBASE_ENABLED && firebaseDb) {
+    firebaseDb.collection("orders").doc(orderId).get().then(function (doc) {
+      if (doc.exists) {
+        callback(doc.data());
+      } else {
+        callback(ordersGet(orderId));
+      }
+    }).catch(function () {
+      callback(ordersGet(orderId));
+    });
+  } else {
+    callback(ordersGet(orderId));
+  }
+}
