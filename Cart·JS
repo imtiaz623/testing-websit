@@ -1,0 +1,87 @@
+/* ==========================================================================
+   FreshDrop Marketplace -- Cart (shared across all pages)
+   Persists to localStorage under "freshdrop-cart" so a page refresh does
+   not lose the customer's basket. Depends on PRODUCTS from products-data.js
+   being loaded first on any page that needs product lookups.
+   ========================================================================== */
+
+const CART_KEY = "freshdrop-cart";
+const DELIVERY_CHARGE = 150;
+
+function cartRead() {
+  try {
+    const raw = localStorage.getItem(CART_KEY);
+    return raw ? JSON.parse(raw) : {};
+  } catch (err) {
+    return {};
+  }
+}
+
+function cartWrite(cart) {
+  try {
+    localStorage.setItem(CART_KEY, JSON.stringify(cart));
+  } catch (err) {
+    /* storage unavailable (private browsing, quota) -- fail silently */
+  }
+  cartUpdateBadge();
+}
+
+/** cart shape: { [productId]: quantity } */
+function cartAdd(productId, quantity) {
+  const cart = cartRead();
+  cart[productId] = (cart[productId] || 0) + (quantity || 1);
+  cartWrite(cart);
+}
+
+function cartSetQuantity(productId, quantity) {
+  const cart = cartRead();
+  if (quantity <= 0) {
+    delete cart[productId];
+  } else {
+    cart[productId] = quantity;
+  }
+  cartWrite(cart);
+}
+
+function cartRemove(productId) {
+  const cart = cartRead();
+  delete cart[productId];
+  cartWrite(cart);
+}
+
+function cartClear() {
+  cartWrite({});
+}
+
+function cartCount() {
+  const cart = cartRead();
+  return Object.keys(cart).reduce(function (sum, id) { return sum + cart[id]; }, 0);
+}
+
+/** Returns [{ product, quantity, lineTotal }] using PRODUCTS lookup, skipping
+    any cart entries whose product no longer exists in the catalog. */
+function cartGetLineItems() {
+  const cart = cartRead();
+  const items = [];
+  Object.keys(cart).forEach(function (productId) {
+    const product = PRODUCTS.find(function (p) { return p.productId === productId; });
+    if (!product) return;
+    const quantity = cart[productId];
+    items.push({ product: product, quantity: quantity, lineTotal: product.sellingPrice * quantity });
+  });
+  return items;
+}
+
+function cartSubtotal() {
+  return cartGetLineItems().reduce(function (sum, item) { return sum + item.lineTotal; }, 0);
+}
+
+function cartUpdateBadge() {
+  const count = cartCount();
+  document.querySelectorAll("[data-cart-count]").forEach(function (el) {
+    el.textContent = String(count);
+    el.classList.toggle("hidden", count === 0);
+  });
+}
+
+document.addEventListener("DOMContentLoaded", cartUpdateBadge);
