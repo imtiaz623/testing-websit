@@ -1,0 +1,195 @@
+/* ==========================================================================
+   FreshDrop Marketplace -- Store page logic
+   Depends on: products-data.js, marketplace-ui.js (loaded first)
+   ========================================================================== */
+
+document.addEventListener("DOMContentLoaded", function () {
+
+  const categoryFilterList = document.getElementById("categoryFilterList");
+  const brandFilterList = document.getElementById("brandFilterList");
+  const priceMin = document.getElementById("priceMin");
+  const priceMax = document.getElementById("priceMax");
+  const inStockOnly = document.getElementById("inStockOnly");
+  const sortSelect = document.getElementById("sortSelect");
+  const storeProductGrid = document.getElementById("storeProductGrid");
+  const storeCount = document.getElementById("storeCount");
+  const loadMoreWrap = document.getElementById("loadMoreWrap");
+  const loadMoreBtn = document.getElementById("loadMoreBtn");
+  const clearFiltersBtn = document.getElementById("clearFiltersBtn");
+  const filterSidebar = document.getElementById("filterSidebar");
+  const mobileFilterToggle = document.getElementById("mobileFilterToggle");
+
+  const PAGE_SIZE = 8;
+  let visibleCount = PAGE_SIZE;
+
+  /* ---------- Build category filter checkboxes ---------- */
+  PRODUCT_CATEGORIES.forEach(function (cat) {
+    const label = document.createElement("label");
+    label.className = "filter-option";
+    label.innerHTML =
+      '<input type="checkbox" value="' + cat.id + '" class="category-filter-checkbox" /> ' +
+      cat.icon + " " + cat.label;
+    categoryFilterList.appendChild(label);
+  });
+
+  /* ---------- Build brand filter checkboxes (unique brands) ---------- */
+  const brands = Array.from(new Set(PRODUCTS.map(function (p) { return p.brand; }))).sort();
+  brands.forEach(function (brand) {
+    const label = document.createElement("label");
+    label.className = "filter-option";
+    label.innerHTML = '<input type="checkbox" value="' + brand + '" class="brand-filter-checkbox" /> ' + brand;
+    brandFilterList.appendChild(label);
+  });
+
+  /* ---------- Read URL query params (?q=, ?category=, ?deal=1) ---------- */
+  const params = new URLSearchParams(window.location.search);
+  const initialQuery = params.get("q") || "";
+  const initialCategory = params.get("category") || "";
+  const initialDeal = params.get("deal") === "1";
+
+  if (initialCategory) {
+    const cb = categoryFilterList.querySelector('input[value="' + initialCategory + '"]');
+    if (cb) cb.checked = true;
+  }
+
+  const navSearchInputEl = document.getElementById("navSearchInput");
+  if (initialQuery && navSearchInputEl) navSearchInputEl.value = initialQuery;
+
+  /* ---------- Filtering + sorting ---------- */
+  function getActiveFilters() {
+    const checkedCategories = Array.from(categoryFilterList.querySelectorAll(".category-filter-checkbox:checked")).map(function (cb) { return cb.value; });
+    const checkedBrands = Array.from(brandFilterList.querySelectorAll(".brand-filter-checkbox:checked")).map(function (cb) { return cb.value; });
+    const minRating = parseFloat(document.querySelector('input[name="ratingFilter"]:checked').value) || 0;
+    const min = priceMin.value ? parseFloat(priceMin.value) : null;
+    const max = priceMax.value ? parseFloat(priceMax.value) : null;
+    const stockOnly = inStockOnly.checked;
+    const query = (navSearchInputEl && navSearchInputEl.value.trim().toLowerCase()) || "";
+
+    return { checkedCategories: checkedCategories, checkedBrands: checkedBrands, minRating: minRating, min: min, max: max, stockOnly: stockOnly, query: query };
+  }
+
+  function applyFiltersAndSort() {
+    const f = getActiveFilters();
+    let results = PRODUCTS.slice();
+
+    if (initialDeal) {
+      results = results.filter(function (p) { return p.badges.indexOf("flashDeal") !== -1; });
+    }
+    if (f.checkedCategories.length) {
+      results = results.filter(function (p) { return f.checkedCategories.indexOf(p.category) !== -1; });
+    }
+    if (f.checkedBrands.length) {
+      results = results.filter(function (p) { return f.checkedBrands.indexOf(p.brand) !== -1; });
+    }
+    if (f.minRating) {
+      results = results.filter(function (p) { return p.rating >= f.minRating; });
+    }
+    if (f.min !== null) {
+      results = results.filter(function (p) { return p.sellingPrice >= f.min; });
+    }
+    if (f.max !== null) {
+      results = results.filter(function (p) { return p.sellingPrice <= f.max; });
+    }
+    if (f.stockOnly) {
+      results = results.filter(function (p) { return p.inStock; });
+    }
+    if (f.query) {
+      results = results.filter(function (p) {
+        return p.title.toLowerCase().includes(f.query) ||
+               p.category.toLowerCase().includes(f.query) ||
+               p.brand.toLowerCase().includes(f.query);
+      });
+    }
+
+    switch (sortSelect.value) {
+      case "newest":
+        results.sort(function (a, b) { return (b.badges.indexOf("newArrival") !== -1 ? 1 : 0) - (a.badges.indexOf("newArrival") !== -1 ? 1 : 0); });
+        break;
+      case "price-low":
+        results.sort(function (a, b) { return a.sellingPrice - b.sellingPrice; });
+        break;
+      case "price-high":
+        results.sort(function (a, b) { return b.sellingPrice - a.sellingPrice; });
+        break;
+      case "rating":
+        results.sort(function (a, b) { return b.rating - a.rating; });
+        break;
+      default: /* popular: bestseller/trending first, then by review count */
+        results.sort(function (a, b) {
+          const aScore = (a.badges.indexOf("bestseller") !== -1 ? 2 : 0) + (a.badges.indexOf("trending") !== -1 ? 1 : 0);
+          const bScore = (b.badges.indexOf("bestseller") !== -1 ? 2 : 0) + (b.badges.indexOf("trending") !== -1 ? 1 : 0);
+          if (bScore !== aScore) return bScore - aScore;
+          return b.reviewCount - a.reviewCount;
+        });
+    }
+
+    return results;
+  }
+
+  function render() {
+    const results = applyFiltersAndSort();
+    const shown = results.slice(0, visibleCount);
+
+    renderProductGrid(storeProductGrid, shown);
+    storeCount.textContent = "Showing " + shown.length + " of " + results.length + " product" + (results.length === 1 ? "" : "s");
+    loadMoreWrap.hidden = shown.length >= results.length;
+  }
+
+  function refreshAndReset() {
+    visibleCount = PAGE_SIZE;
+    render();
+  }
+
+  [priceMin, priceMax, inStockOnly, sortSelect].forEach(function (el) {
+    el.addEventListener("input", refreshAndReset);
+    el.addEventListener("change", refreshAndReset);
+  });
+  categoryFilterList.addEventListener("change", refreshAndReset);
+  brandFilterList.addEventListener("change", refreshAndReset);
+  document.querySelectorAll('input[name="ratingFilter"]').forEach(function (radio) {
+    radio.addEventListener("change", refreshAndReset);
+  });
+  if (navSearchInputEl) {
+    navSearchInputEl.addEventListener("input", refreshAndReset);
+  }
+
+  loadMoreBtn.addEventListener("click", function () {
+    visibleCount += PAGE_SIZE;
+    render();
+  });
+
+  clearFiltersBtn.addEventListener("click", function () {
+    categoryFilterList.querySelectorAll("input").forEach(function (cb) { cb.checked = false; });
+    brandFilterList.querySelectorAll("input").forEach(function (cb) { cb.checked = false; });
+    document.querySelector('input[name="ratingFilter"][value="0"]').checked = true;
+    priceMin.value = "";
+    priceMax.value = "";
+    inStockOnly.checked = false;
+    if (navSearchInputEl) navSearchInputEl.value = "";
+    refreshAndReset();
+  });
+
+  if (mobileFilterToggle) {
+    mobileFilterToggle.addEventListener("click", function () {
+      filterSidebar.classList.toggle("open");
+    });
+  }
+
+  render();
+
+  /* Re-render with live Firestore data if configured (falls back silently
+     to the local catalog already rendered above if not). */
+  if (typeof syncProductsFromFirestore === "function") {
+    syncProductsFromFirestore(function () {
+      brandFilterList.innerHTML = "";
+      const freshBrands = Array.from(new Set(PRODUCTS.map(function (p) { return p.brand; }))).sort();
+      freshBrands.forEach(function (brand) {
+        const label = document.createElement("label");
+        label.className = "filter-option";
+        label.innerHTML = '<input type="checkbox" value="' + brand + '" class="brand-filter-checkbox" /> ' + brand;
+        brandFilterList.appendChild(label);
+      });
+      render();
+    });
+  }
+});
