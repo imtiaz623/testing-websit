@@ -1,0 +1,84 @@
+/* ==========================================================================
+   FreshDrop Marketplace -- Checkout page logic
+   Depends on: products-data.js, cart.js, orders-store.js
+   ========================================================================== */
+
+document.addEventListener("DOMContentLoaded", function () {
+  const checkoutEmptyState = document.getElementById("checkoutEmptyState");
+  const checkoutFormState = document.getElementById("checkoutFormState");
+  const orderConfirmationState = document.getElementById("orderConfirmationState");
+  const checkoutItemsSummary = document.getElementById("checkoutItemsSummary");
+  const checkoutSubtotal = document.getElementById("checkoutSubtotal");
+  const checkoutDelivery = document.getElementById("checkoutDelivery");
+  const checkoutTotal = document.getElementById("checkoutTotal");
+  const checkoutForm = document.getElementById("checkoutForm");
+
+  const items = cartGetLineItems();
+
+  if (!items.length) {
+    checkoutEmptyState.hidden = false;
+    checkoutFormState.hidden = true;
+    return;
+  }
+
+  checkoutItemsSummary.innerHTML = items.map(function (item) {
+    return '<div class="order-summary-mini-row"><span>' + item.quantity + ' x ' + escapeHtmlGlobal(item.product.title) + '</span><span>' + formatPKR(item.lineTotal) + '</span></div>';
+  }).join("");
+
+  const subtotal = cartSubtotal();
+  checkoutSubtotal.textContent = formatPKR(subtotal);
+  checkoutDelivery.textContent = formatPKR(DELIVERY_CHARGE);
+  checkoutTotal.textContent = formatPKR(subtotal + DELIVERY_CHARGE);
+
+  /* ---------- Pakistani mobile number validation ---------- */
+  function isValidPakMobile(value) {
+    const digits = value.replace(/[\s-]/g, "");
+    return /^(\+92|0)3\d{9}$/.test(digits);
+  }
+
+  checkoutForm.addEventListener("submit", function (e) {
+    e.preventDefault();
+
+    const nameField = document.getElementById("checkoutName");
+    const mobileField = document.getElementById("checkoutMobile");
+    const cityField = document.getElementById("checkoutCity");
+    const areaField = document.getElementById("checkoutArea");
+    const addressField = document.getElementById("checkoutAddress");
+
+    if (!checkoutForm.checkValidity()) {
+      checkoutForm.reportValidity();
+      return;
+    }
+
+    if (!isValidPakMobile(mobileField.value)) {
+      showToast("Enter a valid mobile number, e.g. 03XX-XXXXXXX.", "error");
+      mobileField.focus();
+      return;
+    }
+
+    const orderId = ordersGenerateId();
+    const orderData = {
+      status: "placed",
+      customerName: nameField.value.trim(),
+      mobile: mobileField.value.trim(),
+      city: cityField.value.trim(),
+      area: areaField.value.trim(),
+      address: addressField.value.trim(),
+      landmark: document.getElementById("checkoutLandmark").value.trim(),
+      items: items.map(function (item) { return { title: item.product.title, quantity: item.quantity, price: item.product.sellingPrice }; }),
+      subtotal: subtotal,
+      delivery: DELIVERY_CHARGE,
+      total: subtotal + DELIVERY_CHARGE
+    };
+
+    ordersSave(orderId, orderData);
+    if (typeof ordersSaveRemote === "function") ordersSaveRemote(orderId, orderData);
+
+    cartClear();
+
+    document.getElementById("confirmedOrderId").textContent = orderId;
+    checkoutFormState.hidden = true;
+    orderConfirmationState.hidden = false;
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  });
+});
