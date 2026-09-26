@@ -1,0 +1,78 @@
+/* ==========================================================================
+   FreshDrop Marketplace -- Cart page logic
+   Depends on: products-data.js, cart.js
+   ========================================================================== */
+
+document.addEventListener("DOMContentLoaded", function () {
+  const cartEmptyState = document.getElementById("cartEmptyState");
+  const cartLayout = document.getElementById("cartLayout");
+  const cartItemsList = document.getElementById("cartItemsList");
+  const cartSubtotalEl = document.getElementById("cartSubtotal");
+  const cartDeliveryEl = document.getElementById("cartDelivery");
+  const cartTotalEl = document.getElementById("cartTotal");
+
+  function renderCartItem(item) {
+    const p = item.product;
+    return (
+      '<div class="cart-item-row" data-cart-row="' + p.productId + '">' +
+        '<div class="cart-item-media" aria-hidden="true">' + p.icon + '</div>' +
+        '<div>' +
+          '<a href="product.html?slug=' + p.slug + '" class="cart-item-title">' + escapeHtmlGlobal(p.title) + '</a>' +
+          '<p class="cart-item-price">' + formatPKR(p.sellingPrice) + ' each</p>' +
+        '</div>' +
+        '<div class="cart-item-controls">' +
+          '<div class="qty-selector">' +
+            '<button class="qty-btn" data-qty-decrease="' + p.productId + '" type="button" aria-label="Decrease quantity">&#8722;</button>' +
+            '<span class="qty-value">' + item.quantity + '</span>' +
+            '<button class="qty-btn" data-qty-increase="' + p.productId + '" type="button" aria-label="Increase quantity">+</button>' +
+          '</div>' +
+          '<span style="font-weight:700;color:var(--forest);min-width:90px;text-align:right;">' + formatPKR(item.lineTotal) + '</span>' +
+          '<button class="cart-item-remove" data-remove="' + p.productId + '" type="button">Remove</button>' +
+        '</div>' +
+      '</div>'
+    );
+  }
+
+  function render() {
+    const items = cartGetLineItems();
+
+    if (!items.length) {
+      cartEmptyState.hidden = false;
+      cartLayout.hidden = true;
+      return;
+    }
+
+    cartEmptyState.hidden = true;
+    cartLayout.hidden = false;
+    cartItemsList.innerHTML = items.map(renderCartItem).join("");
+
+    const subtotal = cartSubtotal();
+    cartSubtotalEl.textContent = formatPKR(subtotal);
+    cartDeliveryEl.textContent = formatPKR(DELIVERY_CHARGE);
+    cartTotalEl.textContent = formatPKR(subtotal + DELIVERY_CHARGE);
+  }
+
+  cartItemsList.addEventListener("click", function (e) {
+    const incBtn = e.target.closest("[data-qty-increase]");
+    const decBtn = e.target.closest("[data-qty-decrease]");
+    const removeBtn = e.target.closest("[data-remove]");
+
+    if (incBtn) {
+      const id = incBtn.getAttribute("data-qty-increase");
+      const cart = cartRead();
+      cartSetQuantity(id, (cart[id] || 0) + 1);
+      render();
+    } else if (decBtn) {
+      const id = decBtn.getAttribute("data-qty-decrease");
+      const cart = cartRead();
+      cartSetQuantity(id, (cart[id] || 0) - 1);
+      render();
+    } else if (removeBtn) {
+      cartRemove(removeBtn.getAttribute("data-remove"));
+      showToast("Item removed from cart.", "success");
+      render();
+    }
+  });
+
+  render();
+});
