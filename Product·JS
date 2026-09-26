@@ -1,0 +1,163 @@
+/* ==========================================================================
+   FreshDrop Marketplace -- Product detail page logic
+   Depends on: products-data.js, cart.js, wishlist.js, marketplace-ui.js
+   ========================================================================== */
+
+document.addEventListener("DOMContentLoaded", function () {
+  const params = new URLSearchParams(window.location.search);
+  const slug = params.get("slug");
+  const product = slug ? getProductBySlug(slug) : null;
+
+  const notFoundEl = document.getElementById("productNotFound");
+  const contentEl = document.getElementById("productDetailContent");
+  const tabsEl = document.getElementById("productTabs");
+
+  if (!product) {
+    notFoundEl.hidden = false;
+    return;
+  }
+
+  contentEl.hidden = false;
+  tabsEl.hidden = false;
+
+  /* ---------- SEO: title + description ---------- */
+  document.title = product.title + " | FreshDrop";
+  document.getElementById("pageTitle").textContent = product.title + " | FreshDrop";
+  document.getElementById("pageDescription").setAttribute("content", product.description.slice(0, 155));
+
+  /* ---------- Breadcrumb ---------- */
+  const categoryInfo = PRODUCT_CATEGORIES.find(function (c) { return c.id === product.category; });
+  document.getElementById("breadcrumbCategory").textContent = categoryInfo ? categoryInfo.label : product.category;
+
+  /* ---------- Gallery (icon-based placeholder, single "image" reused as thumbs) ---------- */
+  const galleryMain = document.getElementById("galleryMain");
+  const galleryThumbs = document.getElementById("galleryThumbs");
+  galleryMain.innerHTML = '<span aria-hidden="true">' + product.icon + '</span>';
+  galleryMain.setAttribute("role", "img");
+  galleryMain.setAttribute("aria-label", product.title);
+  for (let i = 0; i < 3; i++) {
+    const thumb = document.createElement("button");
+    thumb.className = "gallery-thumb" + (i === 0 ? " active" : "");
+    thumb.type = "button";
+    thumb.setAttribute("aria-label", "View image " + (i + 1));
+    thumb.innerHTML = '<span aria-hidden="true">' + product.icon + '</span>';
+    thumb.addEventListener("click", function () {
+      galleryThumbs.querySelectorAll(".gallery-thumb").forEach(function (t) { t.classList.remove("active"); });
+      thumb.classList.add("active");
+    });
+    galleryThumbs.appendChild(thumb);
+  }
+
+  /* ---------- Title, brand, rating, price ---------- */
+  document.getElementById("productTitle").textContent = product.title;
+  document.getElementById("productBrand").textContent = "Brand: " + product.brand + "  |  SKU: " + product.sku;
+  document.getElementById("productStars").textContent = renderStarsHtml(product.rating);
+  document.getElementById("productReviewCount").textContent = product.rating.toFixed(1) + " (" + product.reviewCount + " reviews)";
+  document.getElementById("productPriceCurrent").textContent = formatPKR(product.sellingPrice);
+
+  if (product.originalPrice) {
+    document.getElementById("productPriceOriginal").textContent = formatPKR(product.originalPrice);
+    document.getElementById("productDiscount").textContent = product.discountPercent + "% OFF";
+  }
+
+  document.getElementById("productDescription").textContent = product.description;
+
+  const stockLine = document.getElementById("stockLine");
+  stockLine.innerHTML =
+    '<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> ' +
+    (product.inStock ? product.stock + " in stock, ready to ship" : "Currently out of stock");
+
+  /* ---------- Description / Specs / Reviews tabs ---------- */
+  document.getElementById("tabDescription").innerHTML = '<p style="color: var(--muted); max-width: 640px; line-height: 1.7;">' + escapeHtmlGlobal(product.description) + '</p>';
+
+  const specsRows = product.specs.map(function (row) {
+    return '<tr><td>' + escapeHtmlGlobal(row[0]) + '</td><td>' + escapeHtmlGlobal(row[1]) + '</td></tr>';
+  }).join("");
+  document.getElementById("tabSpecs").innerHTML = '<table class="spec-table">' + specsRows + '</table>';
+
+  const sampleReviews = [
+    { name: "Sana K.", rating: Math.min(5, Math.round(product.rating)), text: "Exactly as described, arrived faster than expected. Would buy again." },
+    { name: "Bilal A.", rating: Math.max(3, Math.round(product.rating) - 1), text: "Good quality for the price. Packaging could be a bit better." }
+  ];
+  document.getElementById("productReviewGrid").innerHTML = sampleReviews.map(function (r) {
+    return '<div class="review-card"><div class="review-stars">' + renderStarsHtml(r.rating) + '</div><p class="review-text">' + escapeHtmlGlobal(r.text) + '</p><div class="review-author"><span class="review-avatar">' + escapeHtmlGlobal(r.name[0]) + '</span><div class="review-author-name">' + escapeHtmlGlobal(r.name) + '</div></div></div>';
+  }).join("");
+
+  document.querySelectorAll(".product-tab-btn").forEach(function (btn) {
+    btn.addEventListener("click", function () {
+      const tab = btn.getAttribute("data-tab");
+      document.querySelectorAll(".product-tab-btn").forEach(function (b) { b.classList.toggle("active", b === btn); });
+      document.querySelectorAll(".product-tab-panel").forEach(function (p) { p.classList.toggle("active", p.getAttribute("data-tab") === tab); });
+    });
+  });
+
+  /* ---------- Quantity selector ---------- */
+  let quantity = 1;
+  const qtyValue = document.getElementById("qtyValue");
+  document.getElementById("qtyIncrease").addEventListener("click", function () {
+    if (quantity < product.stock) { quantity++; qtyValue.textContent = quantity; }
+  });
+  document.getElementById("qtyDecrease").addEventListener("click", function () {
+    if (quantity > 1) { quantity--; qtyValue.textContent = quantity; }
+  });
+
+  /* ---------- Add to Cart / Buy Now ---------- */
+  function addCurrentToCart() {
+    cartAdd(product.productId, quantity);
+    showToast(quantity + " x " + product.title + " added to cart.", "success");
+  }
+
+  function buyNow() {
+    cartAdd(product.productId, quantity);
+    window.location.href = "checkout.html";
+  }
+
+  document.getElementById("addToCartBtn").addEventListener("click", addCurrentToCart);
+  document.getElementById("buyNowBtn").addEventListener("click", buyNow);
+  document.getElementById("stickyAddToCartBtn").addEventListener("click", addCurrentToCart);
+  document.getElementById("stickyBuyNowBtn").addEventListener("click", buyNow);
+
+  /* ---------- Wishlist button ---------- */
+  const pdpWishlistBtn = document.getElementById("pdpWishlistBtn");
+  pdpWishlistBtn.setAttribute("data-wishlist-btn", product.productId);
+  pdpWishlistBtn.classList.toggle("active", wishlistHas(product.productId));
+  pdpWishlistBtn.addEventListener("click", function () {
+    const added = wishlistToggle(product.productId);
+    showToast(added ? "Added to wishlist." : "Removed from wishlist.", "success");
+  });
+
+  /* ---------- Sticky mobile buy bar ---------- */
+  document.getElementById("stickyBuyPrice").textContent = formatPKR(product.sellingPrice);
+  document.body.classList.add("has-sticky-buy-bar");
+  document.getElementById("stickyBuyBar").classList.add("active");
+
+  /* ---------- Related products ---------- */
+  const related = getRelatedProducts(product, 4);
+  if (related.length) {
+    document.getElementById("relatedProducts").hidden = false;
+    renderProductGrid(document.getElementById("relatedProductGrid"), related);
+  }
+
+  /* ---------- Live price/stock sync from Firestore, if configured ---------- */
+  if (typeof syncProductsFromFirestore === "function") {
+    syncProductsFromFirestore(function () {
+      const fresh = getProductBySlug(slug);
+      if (!fresh) return;
+
+      document.getElementById("productPriceCurrent").textContent = formatPKR(fresh.sellingPrice);
+      if (fresh.originalPrice) {
+        document.getElementById("productPriceOriginal").textContent = formatPKR(fresh.originalPrice);
+        document.getElementById("productDiscount").textContent = fresh.discountPercent + "% OFF";
+      }
+      stockLine.innerHTML =
+        '<svg width="17" height="17" viewBox="0 0 24 24" fill="none"><path d="M5 12l4 4 10-10" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg> ' +
+        (fresh.inStock ? fresh.stock + " in stock, ready to ship" : "Currently out of stock");
+      document.getElementById("stickyBuyPrice").textContent = formatPKR(fresh.sellingPrice);
+
+      if (!fresh.inStock) {
+        document.getElementById("addToCartBtn").disabled = true;
+        document.getElementById("buyNowBtn").disabled = true;
+      }
+    });
+  }
+});
