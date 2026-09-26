@@ -64,12 +64,13 @@ document.addEventListener("DOMContentLoaded", function () {
   /* ---------- Mini order tracking ---------- */
   const dashboardTrackingForm = document.getElementById("dashboardTrackingForm");
   const dashboardTrackingId = document.getElementById("dashboardTrackingId");
+  const dashboardTrackingMobile = document.getElementById("dashboardTrackingMobile");
   const dashboardTrackingResult = document.getElementById("dashboardTrackingResult");
   const dashboardTrackingOrderId = document.getElementById("dashboardTrackingOrderId");
   const dashboardTrackingStatusText = document.getElementById("dashboardTrackingStatusText");
   const dashboardTimelineSteps = document.querySelectorAll("#dashboardTimeline .timeline-step");
 
-  const orderStore = {
+  const demoOrderStore = {
     "FD-1001": { status: "out-for-delivery" },
     "FD-2045": { status: "delivered" },
     "FD-1877": { status: "delivered" }
@@ -104,13 +105,18 @@ document.addEventListener("DOMContentLoaded", function () {
     dashboardTrackingForm.addEventListener("submit", function (e) {
       e.preventDefault();
       const id = dashboardTrackingId.value.trim().toUpperCase();
+      const mobile = dashboardTrackingMobile.value.trim();
 
       if (!id) {
         showToast("Enter an order ID to track your delivery.", "error");
         return;
       }
+      if (!mobile) {
+        showToast("Enter the mobile number used for this order.", "error");
+        return;
+      }
 
-      let order = orderStore[id];
+      let order = (typeof ordersGet === "function" ? ordersGet(id) : null) || demoOrderStore[id];
       if (!order) {
         if (!/^FD-\d{3,5}$/.test(id)) {
           showToast("We couldn't find an order with that ID.", "error");
@@ -124,6 +130,18 @@ document.addEventListener("DOMContentLoaded", function () {
       renderDashboardTimeline(order.status);
       dashboardTrackingResult.hidden = false;
     });
+  }
+
+  /* ---------- Wishlist panel ---------- */
+  const wishlistGrid = document.getElementById("wishlistGrid");
+  const wishlistEmpty = document.getElementById("wishlistEmpty");
+  if (wishlistGrid && typeof wishlistGetProducts === "function") {
+    const savedProducts = wishlistGetProducts();
+    if (savedProducts.length) {
+      renderProductGrid(wishlistGrid, savedProducts);
+    } else {
+      wishlistEmpty.hidden = false;
+    }
   }
 
   /* ---------- Logout ---------- */
