@@ -1,0 +1,150 @@
+/* ==========================================================================
+   FreshDrop Marketplace -- Product data layer
+   --------------------------------------------------------------------------
+   This is the single source of product data for the whole site (store page,
+   homepage sections, product detail page, cart, search). Nothing hardcodes
+   product info directly into UI components -- everything reads from here.
+
+   IMPORTANT -- supplier/margin fields are considered INTERNAL/ADMIN-ONLY:
+   supplierSKU, supplierPrice, profitMarginPercent, supplier.
+   No UI component should ever render these to a customer. Only
+   sellingPrice, originalPrice (derived), and discountPercent are customer
+   facing. This keeps the data model ready for a future supplier/admin
+   panel (CSV import, API feed, dropshipping integration) without any
+   frontend rebuild -- the UI already only reads the public fields below.
+   ========================================================================== */
+
+/**
+ * Computes a selling price from a supplier cost and a profit margin.
+ * Example: supplierPrice 1000, margin 30% -> sellingPrice 1300.
+ * An admin panel could call this to auto-price new supplier feed items,
+ * or override the result manually per product.
+ */
+function computeSellingPrice(supplierPrice, profitMarginPercent) {
+  return Math.round(supplierPrice * (1 + profitMarginPercent / 100));
+}
+
+/**
+ * Derives a "was" price from a selling price + discount percent, so the
+ * UI can show a struck-through original price next to the current price.
+ */
+function computeOriginalPrice(sellingPrice, discountPercent) {
+  if (!discountPercent) return null;
+  return Math.round(sellingPrice / (1 - discountPercent / 100));
+}
+
+const PRODUCT_CATEGORIES = [
+  { id: "electronics", label: "Electronics", icon: "\uD83D\uDCF1" },
+  { id: "mobile-accessories", label: "Mobile Accessories", icon: "\uD83D\uDD0C" },
+  { id: "fashion", label: "Fashion", icon: "\uD83D\uDC55" },
+  { id: "beauty", label: "Beauty", icon: "\uD83D\uDC84" },
+  { id: "home-kitchen", label: "Home & Kitchen", icon: "\uD83C\uDFE0" },
+  { id: "watches", label: "Watches", icon: "\u231A" },
+  { id: "shoes", label: "Shoes", icon: "\uD83D\uDC5F" },
+  { id: "jewellery", label: "Jewellery", icon: "\uD83D\uDC8D" },
+  { id: "kids", label: "Kids", icon: "\uD83E\uDDF8" },
+  { id: "lifestyle", label: "Lifestyle", icon: "\uD83C\uDF9E\uFE0F" },
+  { id: "accessories", label: "Accessories", icon: "\uD83D\uDC5C" }
+];
+
+/* Raw catalog: each entry only needs supplierPrice + profitMarginPercent +
+   discountPercent; sellingPrice/originalPrice are computed below so pricing
+   logic lives in one place (ready for a future reseller/margin admin tool). */
+const RAW_PRODUCTS = [
+  { productId: "P001", slug: "smart-watch-series-9", title: "Smart Watch Series 9", category: "watches", brand: "FreshTech", icon: "\u231A", rating: 4.6, reviewCount: 124, stock: 32, sku: "SKU-WT-001", supplierSKU: "MKZ-88213", supplierPrice: 1000, profitMarginPercent: 30, discountPercent: 28, badges: ["trending", "bestseller"], description: "A sleek smart watch with heart-rate tracking, sleep monitoring, and a 1.9-inch AMOLED display. Stay connected without reaching for your phone.", specs: [["Display", "1.9\" AMOLED"], ["Battery life", "Up to 7 days"], ["Water resistance", "IP68"], ["Compatibility", "Android & iOS"]] },
+  { productId: "P002", slug: "wireless-earbuds-pro", title: "Wireless Earbuds Pro", category: "electronics", brand: "FreshTech", icon: "\uD83C\uDFA7", rating: 4.4, reviewCount: 89, stock: 54, sku: "SKU-EL-002", supplierSKU: "MKZ-77201", supplierPrice: 900, profitMarginPercent: 35, discountPercent: 20, badges: ["trending", "flashDeal"], description: "True wireless earbuds with active noise cancellation and 24-hour total battery life with the charging case.", specs: [["Driver size", "10mm"], ["Battery life", "6h + 18h case"], ["Noise cancellation", "Active (ANC)"], ["Charging", "USB-C"]] },
+  { productId: "P003", slug: "portable-bluetooth-speaker", title: "Portable Bluetooth Speaker", category: "electronics", brand: "SoundHive", icon: "\uD83D\uDD0A", rating: 4.3, reviewCount: 61, stock: 40, sku: "SKU-EL-003", supplierSKU: "MKZ-66120", supplierPrice: 1400, profitMarginPercent: 25, discountPercent: 15, badges: ["newArrival"], description: "Compact speaker with deep bass and 12 hours of playtime, built for outdoor use with IPX6 splash resistance.", specs: [["Output", "20W"], ["Battery life", "12 hours"], ["Water resistance", "IPX6"], ["Connectivity", "Bluetooth 5.3"]] },
+  { productId: "P004", slug: "fast-charging-power-bank-20000mah", title: "Fast Charging Power Bank 20000mAh", category: "mobile-accessories", brand: "ChargeUp", icon: "\uD83D\uDD0B", rating: 4.5, reviewCount: 143, stock: 70, sku: "SKU-MA-004", supplierSKU: "MKZ-55302", supplierPrice: 1300, profitMarginPercent: 28, discountPercent: 18, badges: ["bestseller"], description: "High-capacity power bank with dual USB output and fast charging support for phones and tablets.", specs: [["Capacity", "20000mAh"], ["Output", "22.5W fast charge"], ["Ports", "2x USB-A, 1x USB-C"], ["Weight", "410g"]] },
+  { productId: "P005", slug: "tempered-glass-screen-protector", title: "Tempered Glass Screen Protector (2-Pack)", category: "mobile-accessories", brand: "ShieldX", icon: "\uD83D\uDCF2", rating: 4.2, reviewCount: 210, stock: 200, sku: "SKU-MA-005", supplierSKU: "MKZ-44011", supplierPrice: 150, profitMarginPercent: 60, discountPercent: 10, badges: [], description: "9H hardness tempered glass with anti-fingerprint coating, easy bubble-free installation.", specs: [["Hardness", "9H"], ["Pack size", "2 pieces"], ["Coating", "Oleophobic"], ["Compatibility", "Universal sizing"]] },
+  { productId: "P006", slug: "mens-casual-shirt", title: "Men's Casual Cotton Shirt", category: "fashion", brand: "Urban Thread", icon: "\uD83D\uDC54", rating: 4.1, reviewCount: 57, stock: 85, sku: "SKU-FA-006", supplierSKU: "MKZ-33290", supplierPrice: 800, profitMarginPercent: 35, discountPercent: 22, badges: ["newArrival"], description: "Breathable cotton-blend casual shirt, available in multiple sizes, perfect for everyday wear.", specs: [["Material", "Cotton blend"], ["Fit", "Regular"], ["Care", "Machine washable"], ["Sizes", "S - XXL"]] },
+  { productId: "P007", slug: "womens-summer-dress", title: "Women's Summer Dress", category: "fashion", brand: "Bloom & Co", icon: "\uD83D\uDC57", rating: 4.5, reviewCount: 98, stock: 46, sku: "SKU-FA-007", supplierSKU: "MKZ-22188", supplierPrice: 1100, profitMarginPercent: 32, discountPercent: 25, badges: ["trending"], description: "Light, flowy summer dress in a breathable fabric with a flattering silhouette.", specs: [["Material", "Viscose blend"], ["Length", "Midi"], ["Care", "Hand wash cold"], ["Sizes", "XS - XL"]] },
+  { productId: "P008", slug: "leather-sneakers", title: "Men's Leather Sneakers", category: "shoes", brand: "StepOne", icon: "\uD83D\uDC5F", rating: 4.4, reviewCount: 132, stock: 38, sku: "SKU-SH-008", supplierSKU: "MKZ-11077", supplierPrice: 1800, profitMarginPercent: 30, discountPercent: 20, badges: ["bestseller"], description: "Genuine leather sneakers with a cushioned insole, built for all-day comfort.", specs: [["Material", "Genuine leather"], ["Sole", "Rubber, non-slip"], ["Closure", "Lace-up"], ["Sizes", "40 - 45"]] },
+  { productId: "P009", slug: "womens-running-shoes", title: "Women's Running Shoes", category: "shoes", brand: "StepOne", icon: "\uD83D\uDC5F", rating: 4.3, reviewCount: 76, stock: 42, sku: "SKU-SH-009", supplierSKU: "MKZ-11099", supplierPrice: 1700, profitMarginPercent: 30, discountPercent: 15, badges: [], description: "Lightweight running shoes with breathable mesh upper and responsive cushioning.", specs: [["Material", "Mesh + EVA sole"], ["Weight", "220g"], ["Closure", "Lace-up"], ["Sizes", "36 - 41"]] },
+  { productId: "P010", slug: "matte-lipstick-set", title: "Matte Lipstick Set (4 Shades)", category: "beauty", brand: "GlowUp", icon: "\uD83D\uDC84", rating: 4.6, reviewCount: 167, stock: 60, sku: "SKU-BE-010", supplierSKU: "MKZ-99441", supplierPrice: 600, profitMarginPercent: 40, discountPercent: 30, badges: ["flashDeal", "trending"], description: "Long-lasting matte lipstick set in four everyday shades, enriched with vitamin E.", specs: [["Finish", "Matte"], ["Shades", "4"], ["Skin type", "All"], ["Cruelty-free", "Yes"]] },
+  { productId: "P011", slug: "skincare-serum-vitamin-c", title: "Vitamin C Brightening Serum", category: "beauty", brand: "GlowUp", icon: "\uD83E\uDDF4", rating: 4.5, reviewCount: 118, stock: 55, sku: "SKU-BE-011", supplierSKU: "MKZ-99502", supplierPrice: 750, profitMarginPercent: 38, discountPercent: 20, badges: ["bestseller"], description: "Brightening facial serum with vitamin C and hyaluronic acid for a radiant, even skin tone.", specs: [["Volume", "30ml"], ["Key ingredient", "Vitamin C 10%"], ["Skin type", "All"], ["Fragrance-free", "Yes"]] },
+  { productId: "P012", slug: "non-stick-cookware-set", title: "Non-Stick Cookware Set (5-Piece)", category: "home-kitchen", brand: "HomeCraft", icon: "\uD83C\uDF73", rating: 4.4, reviewCount: 94, stock: 25, sku: "SKU-HK-012", supplierSKU: "MKZ-88700", supplierPrice: 3200, profitMarginPercent: 25, discountPercent: 18, badges: ["newArrival"], description: "Durable non-stick cookware set including pans and pots, suitable for gas and induction stoves.", specs: [["Pieces", "5"], ["Coating", "Non-stick ceramic"], ["Compatible", "Gas, induction, electric"], ["Warranty", "1 year"]] },
+  { productId: "P013", slug: "electric-kettle-1-7l", title: "Electric Kettle 1.7L", category: "home-kitchen", brand: "HomeCraft", icon: "\u2615", rating: 4.3, reviewCount: 72, stock: 48, sku: "SKU-HK-013", supplierSKU: "MKZ-88755", supplierPrice: 1400, profitMarginPercent: 28, discountPercent: 12, badges: [], description: "Fast-boiling electric kettle with auto shut-off and a 1.7 litre capacity.", specs: [["Capacity", "1.7L"], ["Power", "1850W"], ["Auto shut-off", "Yes"], ["Material", "Stainless steel"]] },
+  { productId: "P014", slug: "minimalist-analog-watch", title: "Minimalist Analog Watch", category: "watches", brand: "TimeCraft", icon: "\u231A", rating: 4.5, reviewCount: 88, stock: 30, sku: "SKU-WT-014", supplierSKU: "MKZ-77800", supplierPrice: 1200, profitMarginPercent: 32, discountPercent: 20, badges: ["trending"], description: "Clean, minimalist analog watch with a genuine leather strap and scratch-resistant glass.", specs: [["Movement", "Quartz"], ["Strap", "Genuine leather"], ["Water resistance", "3 ATM"], ["Warranty", "1 year"]] },
+  { productId: "P015", slug: "layered-gold-plated-necklace", title: "Layered Gold-Plated Necklace", category: "jewellery", brand: "Aurelia", icon: "\uD83D\uDC8D", rating: 4.6, reviewCount: 54, stock: 27, sku: "SKU-JW-015", supplierSKU: "MKZ-66210", supplierPrice: 500, profitMarginPercent: 45, discountPercent: 25, badges: ["flashDeal"], description: "Delicate layered necklace with a gold-plated finish, hypoallergenic and tarnish-resistant.", specs: [["Plating", "18K gold"], ["Length", "Adjustable 40-45cm"], ["Hypoallergenic", "Yes"], ["Packaging", "Gift box included"]] },
+  { productId: "P016", slug: "kids-building-blocks-set", title: "Kids Building Blocks Set (200pc)", category: "kids", brand: "PlayNest", icon: "\uD83E\uDDF8", rating: 4.7, reviewCount: 103, stock: 65, sku: "SKU-KD-016", supplierSKU: "MKZ-55600", supplierPrice: 900, profitMarginPercent: 30, discountPercent: 15, badges: ["bestseller"], description: "200-piece creative building blocks set, compatible with major block brands, non-toxic materials.", specs: [["Pieces", "200"], ["Material", "ABS plastic"], ["Age range", "3+ years"], ["Storage", "Includes container"]] },
+  { productId: "P017", slug: "insulated-travel-mug", title: "Insulated Travel Mug 500ml", category: "lifestyle", brand: "HomeCraft", icon: "\u2615", rating: 4.4, reviewCount: 66, stock: 90, sku: "SKU-LS-017", supplierSKU: "MKZ-44320", supplierPrice: 450, profitMarginPercent: 40, discountPercent: 10, badges: ["newArrival"], description: "Double-wall insulated travel mug, keeps drinks hot for 6 hours or cold for 12.", specs: [["Capacity", "500ml"], ["Insulation", "Double-wall vacuum"], ["Lid", "Leak-proof"], ["Material", "Stainless steel"]] },
+  { productId: "P018", slug: "leather-wallet-mens", title: "Men's Genuine Leather Wallet", category: "accessories", brand: "Urban Thread", icon: "\uD83D\uDC5C", rating: 4.5, reviewCount: 121, stock: 58, sku: "SKU-AC-018", supplierSKU: "MKZ-33410", supplierPrice: 550, profitMarginPercent: 42, discountPercent: 20, badges: ["bestseller", "trending"], description: "Slim genuine leather wallet with RFID-blocking lining and multiple card slots.", specs: [["Material", "Genuine leather"], ["Card slots", "8"], ["RFID protection", "Yes"], ["Dimensions", "11 x 9cm"]] },
+  { productId: "P019", slug: "sunglasses-uv400", title: "Polarized Sunglasses UV400", category: "accessories", brand: "SunRay", icon: "\uD83D\uDD76\uFE0F", rating: 4.3, reviewCount: 49, stock: 73, sku: "SKU-AC-019", supplierSKU: "MKZ-33455", supplierPrice: 400, profitMarginPercent: 45, discountPercent: 25, badges: ["flashDeal"], description: "Polarized lenses with 100% UV400 protection and a lightweight, durable frame.", specs: [["Lens", "Polarized, UV400"], ["Frame material", "TR90"], ["Style", "Unisex"], ["Includes", "Protective case"]] },
+  { productId: "P020", slug: "yoga-mat-non-slip", title: "Non-Slip Yoga Mat 6mm", category: "lifestyle", brand: "ActiveLife", icon: "\uD83E\uDDD8", rating: 4.6, reviewCount: 84, stock: 50, sku: "SKU-LS-020", supplierSKU: "MKZ-44399", supplierPrice: 700, profitMarginPercent: 35, discountPercent: 18, badges: ["newArrival", "trending"], description: "Extra-thick non-slip yoga mat with carrying strap, suitable for yoga, pilates, and home workouts.", specs: [["Thickness", "6mm"], ["Material", "TPE, eco-friendly"], ["Size", "183 x 61cm"], ["Includes", "Carry strap"]] }
+];
+
+/* Build the public product list: only customer-facing fields are exposed
+   through this array's shape, even though the raw objects still carry the
+   internal supplier fields above (kept for the future admin layer). UI
+   code should read PRODUCTS, not RAW_PRODUCTS, and should never render
+   .supplierPrice / .supplierSKU / .profitMarginPercent. */
+const PRODUCTS = RAW_PRODUCTS.map(function (p) {
+  const sellingPrice = computeSellingPrice(p.supplierPrice, p.profitMarginPercent);
+  const originalPrice = computeOriginalPrice(sellingPrice, p.discountPercent);
+  return Object.assign({}, p, {
+    sellingPrice: sellingPrice,
+    originalPrice: originalPrice,
+    inStock: p.stock > 0,
+    status: p.stock > 0 ? "active" : "out-of-stock"
+  });
+});
+
+function getProductBySlug(slug) {
+  return PRODUCTS.find(function (p) { return p.slug === slug; }) || null;
+}
+
+function getProductsByCategory(categoryId) {
+  return PRODUCTS.filter(function (p) { return p.category === categoryId; });
+}
+
+function getRelatedProducts(product, limit) {
+  return PRODUCTS.filter(function (p) {
+    return p.category === product.category && p.productId !== product.productId;
+  }).slice(0, limit || 4);
+}
+
+function formatPKR(amount) {
+  return "Rs. " + Math.round(amount).toLocaleString("en-PK");
+}
+
+/* ==========================================================================
+   Optional Firestore sync (progressive enhancement)
+   --------------------------------------------------------------------------
+   If firebase-config.js has been set up with real project credentials, this
+   pulls the live product catalog from Firestore's "products" collection and
+   replaces the contents of PRODUCTS in place, then calls onReady() so the
+   page can re-render. If Firebase isn't configured, or the fetch fails, or
+   the "products" collection is empty, PRODUCTS simply keeps using the local
+   RAW_PRODUCTS catalog above -- nothing on the page breaks either way.
+   ========================================================================== */
+
+function buildComputedProduct(raw) {
+  const sellingPrice = raw.sellingPriceOverride || computeSellingPrice(raw.supplierPrice, raw.profitMarginPercent);
+  const originalPrice = computeOriginalPrice(sellingPrice, raw.discountPercent);
+  return Object.assign({}, raw, {
+    sellingPrice: sellingPrice,
+    originalPrice: originalPrice,
+    inStock: raw.stock > 0,
+    status: raw.stock > 0 ? "active" : "out-of-stock"
+  });
+}
+
+function syncProductsFromFirestore(onReady) {
+  if (typeof FIREBASE_ENABLED === "undefined" || !FIREBASE_ENABLED || !firebaseDb) return;
+
+  firebaseDb.collection("products").get().then(function (snapshot) {
+    if (snapshot.empty) return; /* no products added in Firestore yet -- keep local catalog */
+
+    const fetched = [];
+    snapshot.forEach(function (doc) {
+      fetched.push(buildComputedProduct(Object.assign({ productId: doc.id }, doc.data())));
+    });
+
+    PRODUCTS.length = 0;
+    fetched.forEach(function (p) { PRODUCTS.push(p); });
+
+    if (typeof onReady === "function") onReady();
+  }).catch(function (err) {
+    console.warn("Could not load products from Firestore, using local catalog.", err);
+  });
+}
