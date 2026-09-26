@@ -1,0 +1,210 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Store &#8212; Shop All Products | FreshDrop</title>
+  <meta name="description" content="Browse electronics, fashion, beauty, home &amp; kitchen, and more at FreshDrop. Nationwide delivery, cash on delivery, great deals." />
+  <meta name="theme-color" content="#1b4332" />
+  <link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 40 40'%3E%3Cpath fill='%231B4332' d='M20 4C12 10 8 18 8 24a12 12 0 0 0 24 0c0-6-4-14-12-20Z'/%3E%3Cpath stroke='%23F8FAF6' stroke-width='2' stroke-linecap='round' d='M20 12v20'/%3E%3C/svg%3E" />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="style.css" />
+</head>
+<body class="has-bottom-nav">
+
+  <a href="#main-content" class="skip-link">Skip to main content</a>
+
+  <header class="navbar" id="navbar">
+    <div class="nav-inner">
+      <a href="index.html" class="brand">
+        <span class="brand-mark" aria-hidden="true">
+          <svg viewBox="0 0 40 40" width="28" height="28"><path d="M20 4C12 10 8 18 8 24a12 12 0 0 0 24 0c0-6-4-14-12-20Z" fill="currentColor"/><path d="M20 12v20" stroke="#F8FAF6" stroke-width="2" stroke-linecap="round"/></svg>
+        </span>
+        FreshDrop
+      </a>
+
+      <nav class="nav-links" id="navLinks">
+        <a href="index.html">Home</a>
+        <a href="store.html" class="nav-store-link">Store</a>
+        <a href="index.html#categories">Categories</a>
+        <a href="store.html?deal=1">Deals</a>
+        <a href="index.html#track">Track Order</a>
+      </nav>
+
+      <div class="nav-search-box">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="text" id="navSearchInput" placeholder="Search products..." aria-label="Search products" />
+      </div>
+
+      <div class="nav-right">
+        <button class="icon-btn mobile-search-toggle" id="mobileSearchToggle" aria-label="Search">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </button>
+        <a href="cart.html" class="icon-btn cart-icon-btn" aria-label="View cart">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="20.5" r="1.3" fill="currentColor"/><circle cx="17.5" cy="20.5" r="1.3" fill="currentColor"/></svg>
+          <span class="cart-badge hidden" data-cart-count>0</span>
+        </a>
+        <a href="account.html" class="icon-btn" aria-label="My account">
+          <svg width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c1.2-3.8 4.2-6 7-6s5.8 2.2 7 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        </a>
+        <button class="icon-btn theme-toggle" id="themeToggle" aria-label="Toggle dark mode" aria-pressed="false">
+          <svg class="icon-sun" width="19" height="19" viewBox="0 0 24 24" fill="none"><circle cx="12" cy="12" r="4.5" stroke="currentColor" stroke-width="1.8"/><path d="M12 2.5v2.2M12 19.3v2.2M4.2 4.2l1.6 1.6M18.2 18.2l1.6 1.6M2.5 12h2.2M19.3 12h2.2M4.2 19.8l1.6-1.6M18.2 5.8l1.6-1.6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+          <svg class="icon-moon" width="19" height="19" viewBox="0 0 24 24" fill="none"><path d="M20 14.5A8.5 8.5 0 1 1 9.5 4a7 7 0 0 0 10.5 10.5Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>
+        </button>
+        <button class="hamburger" id="hamburger" aria-label="Toggle menu" aria-expanded="false" aria-controls="navLinks">
+          <span></span><span></span><span></span>
+        </button>
+      </div>
+    </div>
+  </header>
+
+  <div class="mobile-search-bar" id="mobileSearchBar" hidden>
+    <div class="section-inner">
+      <form id="mobileSearchForm" novalidate>
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="11" cy="11" r="7" stroke="currentColor" stroke-width="1.8"/><path d="M21 21l-4.3-4.3" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        <input type="text" id="mobileSearchInput" placeholder="Search products..." aria-label="Search products" />
+      </form>
+    </div>
+  </div>
+
+  <main id="main-content">
+    <section class="store-header">
+      <div class="section-inner">
+        <span class="eyebrow-tag">Marketplace</span>
+        <h1>Shop all products</h1>
+        <p class="section-lead" style="margin-bottom: 0;">Electronics, fashion, beauty, home &amp; kitchen, and more &#8212; delivered nationwide with cash on delivery.</p>
+      </div>
+    </section>
+
+    <section class="store-layout">
+      <div class="section-inner">
+        <div class="store-grid-wrap">
+
+          <aside class="filter-sidebar" id="filterSidebar" aria-label="Filter products">
+            <div class="filter-group">
+              <h3>Category</h3>
+              <div id="categoryFilterList"><!-- populated by store.js --></div>
+            </div>
+
+            <div class="filter-group">
+              <h3>Price range (Rs.)</h3>
+              <div class="filter-price-inputs">
+                <input type="number" id="priceMin" placeholder="Min" min="0" />
+                <span>&#8211;</span>
+                <input type="number" id="priceMax" placeholder="Max" min="0" />
+              </div>
+            </div>
+
+            <div class="filter-group">
+              <h3>Minimum rating</h3>
+              <label class="filter-option"><input type="radio" name="ratingFilter" value="0" checked /> Any rating</label>
+              <label class="filter-option"><input type="radio" name="ratingFilter" value="4.5" /> 4.5 &amp; up</label>
+              <label class="filter-option"><input type="radio" name="ratingFilter" value="4" /> 4.0 &amp; up</label>
+              <label class="filter-option"><input type="radio" name="ratingFilter" value="3.5" /> 3.5 &amp; up</label>
+            </div>
+
+            <div class="filter-group">
+              <h3>Availability</h3>
+              <label class="filter-option"><input type="checkbox" id="inStockOnly" /> In stock only</label>
+            </div>
+
+            <div class="filter-group">
+              <h3>Brand</h3>
+              <div id="brandFilterList"><!-- populated by store.js --></div>
+            </div>
+
+            <button class="btn btn-ghost filter-clear-btn" id="clearFiltersBtn" type="button">Clear filters</button>
+          </aside>
+
+          <div class="store-main">
+            <button class="btn btn-ghost mobile-filter-toggle" id="mobileFilterToggle" type="button">Filters</button>
+
+            <div class="store-toolbar">
+              <p class="store-count" id="storeCount">Showing products</p>
+              <div class="sort-dropdown">
+                <label for="sortSelect" class="visually-hidden">Sort by</label>
+                <select id="sortSelect">
+                  <option value="popular">Sort: Popular</option>
+                  <option value="newest">Sort: Newest</option>
+                  <option value="price-low">Price: Low to High</option>
+                  <option value="price-high">Price: High to Low</option>
+                  <option value="rating">Sort: Rating</option>
+                </select>
+              </div>
+            </div>
+
+            <div class="store-product-grid" id="storeProductGrid"><!-- populated by store.js --></div>
+
+            <div class="load-more-wrap" id="loadMoreWrap" hidden>
+              <button class="btn btn-ghost" id="loadMoreBtn" type="button">Load more products</button>
+            </div>
+          </div>
+
+        </div>
+      </div>
+    </section>
+  </main>
+
+  <nav class="mobile-bottom-nav" aria-label="Mobile navigation">
+    <div class="mobile-bottom-nav-inner">
+      <a href="index.html" class="bottom-nav-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 11 12 4l8 7" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 10v9a1 1 0 0 0 1 1h4v-6h2v6h4a1 1 0 0 0 1-1v-9" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        Home
+      </a>
+      <a href="store.html" class="bottom-nav-item active">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M4 8h16l-1.2 10.2a2 2 0 0 1-2 1.8H7.2a2 2 0 0 1-2-1.8L4 8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><path d="M8 8V6a4 4 0 0 1 8 0v2" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Store
+      </a>
+      <a href="store.html?deal=1" class="bottom-nav-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M20 12 12.6 4.6a2 2 0 0 0-1.4-.6H5a1 1 0 0 0-1 1v6.2c0 .5.2 1 .6 1.4L12 20l8-8Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/><circle cx="8.5" cy="8.5" r="1.3" fill="currentColor"/></svg>
+        Deals
+      </a>
+      <a href="cart.html" class="bottom-nav-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M3 4h2l2.4 12.4a2 2 0 0 0 2 1.6h8.2a2 2 0 0 0 2-1.6L21 8H6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"/><circle cx="9.5" cy="20.5" r="1.3" fill="currentColor"/><circle cx="17.5" cy="20.5" r="1.3" fill="currentColor"/></svg>
+        Cart
+        <span class="bottom-nav-badge hidden" data-cart-count>0</span>
+      </a>
+      <a href="account.html" class="bottom-nav-item">
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true"><circle cx="12" cy="8" r="3.5" stroke="currentColor" stroke-width="1.8"/><path d="M5 20c1.2-3.8 4.2-6 7-6s5.8 2.2 7 6" stroke="currentColor" stroke-width="1.8" stroke-linecap="round"/></svg>
+        Account
+      </a>
+    </div>
+  </nav>
+
+  <footer class="site-footer" id="footer">
+    <div class="section-inner footer-inner">
+      <div>
+        <a href="index.html" class="brand footer-brand">
+          <span class="brand-mark" aria-hidden="true"><svg viewBox="0 0 40 40" width="26" height="26"><path d="M20 4C12 10 8 18 8 24a12 12 0 0 0 24 0c0-6-4-14-12-20Z" fill="currentColor"/><path d="M20 12v20" stroke="#1B4332" stroke-width="2" stroke-linecap="round"/></svg></span>
+          FreshDrop
+        </a>
+        <p class="footer-tagline">Online shopping, delivered nationwide.</p>
+      </div>
+      <div class="footer-links">
+        <h4>Explore</h4>
+        <a href="store.html">Store</a>
+        <a href="index.html#categories">Categories</a>
+        <a href="index.html#track">Track order</a>
+        <a href="index.html#faq">FAQ</a>
+      </div>
+      <div class="footer-links">
+        <h4>Legal</h4>
+        <a href="privacy.html">Privacy Policy</a>
+        <a href="terms.html">Terms &amp; Conditions</a>
+      </div>
+    </div>
+    <p class="footer-bottom">&#169; 2026 FreshDrop. All rights reserved.</p>
+  </footer>
+
+  <div class="toast-container" id="toastContainer" aria-live="polite"></div>
+
+  <script src="products-data.js"></script>
+  <script src="cart.js"></script>
+  <script src="wishlist.js"></script>
+  <script src="marketplace-ui.js"></script>
+  <script src="script.js"></script>
+  <script src="store.js"></script>
+</body>
+</html>
