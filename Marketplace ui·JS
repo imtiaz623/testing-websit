@@ -1,0 +1,99 @@
+/* ==========================================================================
+   FreshDrop Marketplace -- Reusable product UI rendering
+   Used by: index.html (Deals/Trending/Best Sellers/New Arrivals), store.html,
+   product.html (related products), account.html (wishlist tab).
+   Depends on: products-data.js, cart.js, wishlist.js
+   ========================================================================== */
+
+function renderStarsHtml(rating) {
+  const full = Math.round(rating);
+  let out = "";
+  for (let i = 1; i <= 5; i++) out += i <= full ? "\u2605" : "\u2606";
+  return out;
+}
+
+function escapeHtmlGlobal(str) {
+  const div = document.createElement("div");
+  div.textContent = String(str);
+  return div.innerHTML;
+}
+
+const BADGE_LABELS = {
+  trending: "Trending",
+  bestseller: "Best Seller",
+  newArrival: "New",
+  flashDeal: "Deal"
+};
+
+/** Returns a product-card HTML string. `basePath` lets pages in the same
+    folder link to product.html the same way ("product.html?slug=..."). */
+function renderProductCard(product) {
+  const badge = product.badges && product.badges.length ? product.badges[0] : null;
+  const badgeHtml = badge
+    ? '<span class="product-badge badge-' + badge + '">' + BADGE_LABELS[badge] + '</span>'
+    : "";
+  const discountHtml = product.discountPercent
+    ? '<span class="product-discount">' + product.discountPercent + '% OFF</span>'
+    : "";
+  const originalPriceHtml = product.originalPrice
+    ? '<span class="product-price-original">' + formatPKR(product.originalPrice) + '</span>'
+    : "";
+  const stockHtml = product.inStock
+    ? '<span class="stock-indicator in-stock">In stock</span>'
+    : '<span class="stock-indicator out-stock">Out of stock</span>';
+
+  return (
+    '<article class="product-card" data-product-id="' + product.productId + '">' +
+      (badgeHtml ? '<div class="product-badges">' + badgeHtml + '</div>' : "") +
+      '<button class="wishlist-btn" data-wishlist-btn="' + product.productId + '" aria-label="Add to wishlist" aria-pressed="false" type="button">' +
+        '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" aria-hidden="true"><path d="M12 21s-7-4.6-9.5-9A5.5 5.5 0 0 1 12 6a5.5 5.5 0 0 1 9.5 6c-2.5 4.4-9.5 9-9.5 9Z" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>' +
+      '</button>' +
+      '<a href="product.html?slug=' + product.slug + '" class="product-card-media">' +
+        '<span class="product-icon" aria-hidden="true">' + product.icon + '</span>' +
+      '</a>' +
+      '<div class="product-card-body">' +
+        '<a href="product.html?slug=' + product.slug + '" class="product-card-title">' + escapeHtmlGlobal(product.title) + '</a>' +
+        '<div class="product-rating"><span class="product-stars">' + renderStarsHtml(product.rating) + '</span><span class="product-review-count">' + product.rating.toFixed(1) + ' (' + product.reviewCount + ')</span></div>' +
+        '<div class="product-price-row">' +
+          '<span class="product-price-current">' + formatPKR(product.sellingPrice) + '</span>' +
+          originalPriceHtml +
+        '</div>' +
+        '<div class="product-meta-row">' + discountHtml + stockHtml + '</div>' +
+        '<button class="btn btn-primary btn-block add-to-cart-btn" data-add-to-cart="' + product.productId + '" type="button"' + (product.inStock ? "" : " disabled") + '>' +
+          (product.inStock ? "Add to Cart" : "Out of Stock") +
+        '</button>' +
+      '</div>' +
+    '</article>'
+  );
+}
+
+function renderProductGrid(container, products) {
+  if (!container) return;
+  if (!products.length) {
+    container.innerHTML = '<p class="no-results">No products match your filters.</p>';
+    return;
+  }
+  container.innerHTML = products.map(renderProductCard).join("");
+  wishlistUpdateButtons();
+}
+
+/** Event delegation so Add-to-Cart and Wishlist buttons work on any
+    dynamically rendered grid, without binding listeners per card. */
+document.addEventListener("click", function (e) {
+  const addBtn = e.target.closest("[data-add-to-cart]");
+  if (addBtn) {
+    const id = addBtn.getAttribute("data-add-to-cart");
+    cartAdd(id, 1);
+    if (typeof showToast === "function") showToast("Added to cart!", "success");
+    return;
+  }
+
+  const wishBtn = e.target.closest("[data-wishlist-btn]");
+  if (wishBtn) {
+    const id = wishBtn.getAttribute("data-wishlist-btn");
+    const added = wishlistToggle(id);
+    if (typeof showToast === "function") {
+      showToast(added ? "Added to wishlist." : "Removed from wishlist.", "success");
+    }
+  }
+});
